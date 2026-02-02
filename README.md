@@ -1,4 +1,4 @@
-# Neurovista: Early Detection of Alzheimer's Disease using MRI and fMRI
+# Neurovista: Early Detection of Alzheimer's Disease using MRI and fMRI (ongoing)
 
 This project focuses on early diagnosis and progression prediction of Alzheimer's Disease by analyzing neuroimaging data from ADNI. The work includes preprocessing, connectivity analysis, and machine learning-based classification of stable and progressive MCI.
 
