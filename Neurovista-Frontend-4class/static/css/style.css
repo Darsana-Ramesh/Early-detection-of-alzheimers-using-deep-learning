@@ -1,0 +1,120 @@
+:root {
+    --primary: #0f172a;
+    --accent: #3b82f6;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text-light: #64748b;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Navbar */
+.navbar {
+    background: var(--primary);
+    color: white;
+    padding: 1.2rem 2rem;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-text { font-weight: 800; letter-spacing: 1px; }
+.brand-sub { font-weight: 300; opacity: 0.7; }
+
+.system-status { font-size: 0.8rem; display: flex; align-items: center; gap: 8px; }
+.dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; }
+
+/* Layout */
+.dashboard-wrapper {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 3rem auto;
+    padding: 0 2rem;
+}
+
+.glass-card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);
+}
+
+/* Upload UI */
+.drop-zone {
+    border: 2px dashed #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    margin: 1.5rem 0;
+}
+
+.drop-zone:hover { border-color: var(--accent); background: #f1f5f9; }
+.upload-icon { font-size: 2rem; display: block; margin-bottom: 10px; }
+
+.btn-main {
+    background: var(--accent);
+    color: white;
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-main:hover { background: #2563eb; transform: translateY(-2px); }
+
+/* Report View */
+.report-card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 4rem;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.08);
+    position: relative;
+    animation: slideIn 0.5s ease-out;
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 1rem;
+}
+
+.chip { background: #f1f5f9; padding: 6px 16px; border-radius: 100px; font-weight: 600; font-size: 0.8rem; }
+
+.main-label { font-size: 6rem; margin: 0; font-weight: 800; }
+.verdict-line { width: 80px; height: 6px; background: var(--accent); margin: 1rem 0; }
+.clinical-msg { font-size: 1.4rem; color: var(--text-light); }
+
+.empty-state { text-align: center; padding: 5rem; color: var(--text-light); }
+.empty-icon { font-size: 5rem; opacity: 0.2; }
+
+/* Loader */
+.loader-container { display: none; margin-top: 2rem; text-align: center; }
+.pulse-loader {
+    width: 40px; height: 40px; background: var(--accent); border-radius: 50%;
+    margin: 0 auto 1rem; animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }

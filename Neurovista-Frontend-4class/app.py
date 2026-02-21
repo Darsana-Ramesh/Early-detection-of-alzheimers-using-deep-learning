@@ -1,18 +1,11 @@
 import os
-import io
-import base64
 import gc
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import joblib
-
-# --- STOP MATPLOTLIB GUI ERRORS ---
-import matplotlib
-matplotlib.use('Agg') 
-import matplotlib.pyplot as plt
-import seaborn as sns
+from datetime import datetime
 
 from flask import Flask, render_template, request, jsonify
 from statsmodels.tsa.api import VAR
@@ -20,26 +13,55 @@ from scipy import signal
 from torch_geometric.nn import GATv2Conv, AttentionalAggregation, BatchNorm, GraphSizeNorm
 from torch_geometric.data import Data
 
+# --- SYSTEM LOGGING ---
+class ExecutionLogger:
+    @staticmethod
+    def log_info(message):
+        print(f"[INFO] {datetime.now().strftime('%H:%M:%S')} | {message}")
+
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
 NUM_NODES = 116
 PCA_DIM = 32
 CLASS_NAMES = ['AD', 'LMCI', 'EMCI', 'CN']
-TR = 3.0  # fMRI Repetition Time
+TR = 3.0  
 
-# --- 1. MODEL ARCHITECTURE (Matches your training exactly) ---
-class NeuroVistaPrecisionNet(torch.nn.Module):
+# --- CORE ARCHITECTURE: MULTIPLEX CROSS-ATTENTION ---
+class MultiplexCrossAttention(nn.Module):
+    def __init__(self, in_channels):
+        super().__init__()
+        self.query = nn.Linear(in_channels, in_channels)
+        self.key = nn.Linear(in_channels, in_channels)
+        self.value = nn.Linear(in_channels, in_channels)
+        self.scale = np.sqrt(in_channels)
+
+    def forward(self, p, g, w):
+        # Stacking topological modalities: [Nodes, 3, Channels]
+        x = torch.stack([p, g, w], dim=1)
+        q, k, v = self.query(x), self.key(x), self.value(x)
+        
+        # Identification of inter-modal consensus
+        attn_scores = torch.matmul(q, k.transpose(-2, -1)) / self.scale
+        attn_weights = F.softmax(attn_scores, dim=-1)
+        return torch.matmul(attn_weights, v).mean(dim=1)
+
+class NeuroVistaGNN(torch.nn.Module):
     def __init__(self, node_in, vector_in):
         super().__init__()
-        self.gat_p = GATv2Conv(node_in, 64, heads=8, concat=True, dropout=0.1)
-        self.gat_g = GATv2Conv(node_in, 64, heads=8, concat=True, dropout=0.1)
-        self.gat_w = GATv2Conv(node_in, 64, heads=8, concat=True, dropout=0.1)
+        self.gat_p = GATv2Conv(node_in, 64, heads=8, concat=True)
+        self.gat_g = GATv2Conv(node_in, 64, heads=8, concat=True)
+        self.gat_w = GATv2Conv(node_in, 64, heads=8, concat=True)
+        
+        # Variable name matches the saved state_dict "cross_modal_fusion"
+        self.cross_modal_fusion = MultiplexCrossAttention(512)
+        
         self.gnorm = GraphSizeNorm()
         self.bn = BatchNorm(512)
         self.pool = AttentionalAggregation(nn.Sequential(nn.Linear(512, 1)))
+        
         self.classifier = nn.Sequential(
-            nn.Linear(512*3 + vector_in, 512),
+            nn.Linear(512 + vector_in, 512),
             nn.LayerNorm(512),
             nn.ReLU(),
             nn.Dropout(0.45),
@@ -49,129 +71,118 @@ class NeuroVistaPrecisionNet(torch.nn.Module):
         )
 
     def forward(self, data):
-        p = F.elu(self.bn(self.gnorm(self.gat_p(data.x, data.edge_index), data.batch)))
-        g = F.elu(self.bn(self.gnorm(self.gat_g(data.x, data.edge_granger), data.batch)))
-        w = F.elu(self.bn(self.gnorm(self.gat_w(data.x, data.edge_wavelet), data.batch)))
-        pooled = torch.cat([
-            self.pool(p, data.batch),
-            self.pool(g, data.batch),
-            self.pool(w, data.batch),
-            data.extra_feat
-        ], dim=1)
-        return self.classifier(pooled)
-
-# --- 2. ASSET LOADING ---
-device = torch.device("cpu")
-model = NeuroVistaPrecisionNet(PCA_DIM, 1024)
-model.load_state_dict(torch.load("neurovista_model.pth", map_location=device))
-model.eval()
-
-scaler = joblib.load("scaler.pkl")
-
-# --- 3. HELPER FUNCTIONS ---
-def generate_heatmap_base64(matrix, title, cmap):
-    plt.figure(figsize=(4, 4))
-    sns.heatmap(matrix, cmap=cmap, cbar=False, xticklabels=False, yticklabels=False)
-    plt.title(title)
-    img = io.BytesIO()
-    plt.savefig(img, format='png', bbox_inches='tight')
-    plt.close('all') 
-    img.seek(0)
-    return base64.b64encode(img.getvalue()).decode()
-
-def calculate_connectivity_from_series(time_series):
-    """Processes the (Time, 116) signal into 3 matrices"""
-    # Ensure orientation is correct (Time points as rows, ROIs as columns)
-    if time_series.shape[0] == 116 and time_series.shape[1] != 116:
-        time_series = time_series.T
-
-    # A. Pearson (Static)
-    p_mat = np.corrcoef(time_series.T)
-    np.nan_to_num(p_mat, copy=False)
-    
-    # B. Granger (Directed)
-    try:
-        var_model = VAR(time_series)
-        results = var_model.fit(1)
-        g_mat = np.abs(results.coefs[0])
-    except:
-        g_mat = np.zeros((NUM_NODES, NUM_NODES))
+        p = F.elu(self.gat_p(data.x, data.edge_index))
+        g = F.elu(self.gat_g(data.x, data.edge_granger))
+        w = F.elu(self.gat_w(data.x, data.edge_wavelet))
         
-    # C. Wavelet Coherence (Spectral)
+        f = self.bn(self.gnorm(self.cross_modal_fusion(p, g, w), data.batch))
+        graph_latent = self.pool(f, data.batch)
+        combined = torch.cat([graph_latent, data.extra_feat], dim=1)
+        return self.classifier(combined)
+
+# --- GLOBAL ASSET INITIALIZATION ---
+device = torch.device("cpu")
+model = NeuroVistaGNN(PCA_DIM, 1024)
+scaler = None
+
+def load_assets():
+    global scaler
+    try:
+        if os.path.exists("neurovista_model.pth"):
+            model.load_state_dict(torch.load("neurovista_model.pth", map_location=device))
+            model.eval()
+            ExecutionLogger.log_info("Model weights loaded successfully.")
+        
+        if os.path.exists("scaler.pkl"):
+            scaler = joblib.load("scaler.pkl")
+            ExecutionLogger.log_info("StandardScaler loaded successfully.")
+    except Exception as e:
+        ExecutionLogger.log_info(f"Asset Load Error: {e}")
+
+load_assets()
+
+# --- TOPOLOGY CALCULATION ---
+def get_topology(ts):
+    """Generates Pearson, Granger, and Coherence matrices from fMRI timeseries."""
+    if ts.shape[0] == NUM_NODES: ts = ts.T
+    
+    # Pearson Correlation
+    p_mat = np.nan_to_num(np.corrcoef(ts.T))
+    
+    # Granger Causality (VAR-1 Approximation)
+    g_mat = np.zeros((NUM_NODES, NUM_NODES))
+    try:
+        res = VAR(ts).fit(1)
+        g_mat = np.abs(res.coefs[0])
+    except: pass
+    
+    # Wavelet/Spectral Coherence
     w_mat = np.zeros((NUM_NODES, NUM_NODES))
     fs = 1.0 / TR
     for i in range(NUM_NODES):
         for j in range(i+1, NUM_NODES):
-            f, Cxy = signal.coherence(time_series[:, i], time_series[:, j], fs=fs, nperseg=64)
-            mean_coh = np.mean(Cxy[(f >= 0.01) & (f <= 0.1)])
-            w_mat[i, j] = w_mat[j, i] = mean_coh
+            f, Cxy = signal.coherence(ts[:, i], ts[:, j], fs=fs, nperseg=64)
+            w_mat[i, j] = w_mat[j, i] = np.mean(Cxy[(f >= 0.01) & (f <= 0.1)])
         w_mat[i, i] = 1.0
         
     return p_mat, g_mat, w_mat
 
-# --- 4. ROUTES ---
+# --- ROUTES ---
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    global scaler
     if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'})
+        return jsonify({'error': 'No file uploaded'}), 400
     
-    file = request.files['file']
+    if scaler is None:
+        return jsonify({'error': 'System assets (scaler) not initialized.'}), 500
 
     try:
-        # 1. Load the .npy file directly from the upload stream
-        # This avoids saving any files to your disk!
-        time_series = np.load(file)
+        file = request.files['file']
+        ExecutionLogger.log_info(f"Processing sequence: {file.filename}")
+        ts = np.load(file)
         
-        # 2. Pipeline: Signal -> 3 Matrices
-        p_mat, g_mat, w_mat = calculate_connectivity_from_series(time_series)
+        # 1. Feature Extraction (Topology Generation)
+        p, g, w = get_topology(ts)
         
-        # 3. Preprocessing for GNN
-        combined_flat = np.hstack([p_mat.flatten(), g_mat.flatten(), w_mat.flatten()]).reshape(1, -1)
-        # Transform and slice to 1024 as per model vector_in
-        extra_feat_scaled = scaler.transform(combined_flat)[:, :1024]
+        # 2. Vectorization for Classifier Input
+        flat = np.hstack([p.flatten(), g.flatten(), w.flatten()]).reshape(1, -1)
+        scaled_vector = scaler.transform(flat)
+        extra = torch.tensor(scaled_vector[:, :1024], dtype=torch.float)
         
-        # 4. Create Graph Object (85th percentile threshold)
-        t = np.percentile(np.abs(p_mat), 85)
-        graph_data = Data(
-            x=torch.tensor(p_mat[:, :PCA_DIM], dtype=torch.float),
-            edge_index=torch.tensor(np.argwhere(np.abs(p_mat) > t).T, dtype=torch.long),
-            edge_granger=torch.tensor(np.argwhere(np.abs(g_mat) > t).T, dtype=torch.long),
-            edge_wavelet=torch.tensor(np.argwhere(np.abs(w_mat) > t).T, dtype=torch.long),
-            extra_feat=torch.tensor(extra_feat_scaled, dtype=torch.float),
+        # 3. Graph Construction (Top 15% Sparsity)
+        threshold = np.percentile(np.abs(p), 85)
+        graph = Data(
+            x=torch.tensor(p[:, :PCA_DIM], dtype=torch.float),
+            edge_index=torch.tensor(np.argwhere(np.abs(p) > threshold).T, dtype=torch.long),
+            edge_granger=torch.tensor(np.argwhere(np.abs(g) > threshold).T, dtype=torch.long),
+            edge_wavelet=torch.tensor(np.argwhere(np.abs(w) > threshold).T, dtype=torch.long),
+            extra_feat=extra,
             batch=torch.zeros(NUM_NODES, dtype=torch.long)
         )
 
-        # 5. GNN Inference
+        # 4. Consensus Inference
         with torch.no_grad():
-            output = model(graph_data)
+            output = model(graph)
             probs = torch.softmax(output, dim=1).numpy()[0]
-            pred_idx = np.argmax(probs)
-
-        # 6. Generate Heatmap strings
-        heatmaps = {
-            'pearson': generate_heatmap_base64(p_mat, "Pearson (Static)", "RdBu_r"),
-            'granger': generate_heatmap_base64(g_mat, "Granger (Directed)", "magma"),
-            'wavelet': generate_heatmap_base64(w_mat, "Coherence (Spectral)", "viridis")
-        }
-
-        # Cleanup memory
+        
+        # Cleanup
         gc.collect()
-
+        
         return jsonify({
-            'prediction': CLASS_NAMES[pred_idx],
-            'confidence': f"{probs[pred_idx]*100:.2f}%",
-            'all_probs': {CLASS_NAMES[i]: f"{probs[i]*100:.2f}%" for i in range(4)},
-            'heatmaps': heatmaps
+            'prediction': CLASS_NAMES[np.argmax(probs)],
+            'confidence': f"{np.max(probs)*100:.1f}%",
+            'all_probs': {CLASS_NAMES[i]: f"{probs[i]*100:.2f}%" for i in range(4)}
         })
-
+        
     except Exception as e:
-        print(f"Server Error: {str(e)}")
-        return jsonify({'error': f"Processing failed: {str(e)}"}), 500
+        ExecutionLogger.log_info(f"Prediction Failure: {str(e)}")
+        return jsonify({'error': f"Internal Processing Error: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    # use_reloader=False prevents double-loading the model in memory
-    app.run(debug=True, use_reloader=False)
+    ExecutionLogger.log_info("NeuroVista Precision Server Active.")
+    app.run(debug=True, port=5000)
