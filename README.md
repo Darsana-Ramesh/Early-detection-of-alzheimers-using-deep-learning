@@ -4,6 +4,15 @@
 
 ---
 
+## 🎯 Research Goal & Objectives
+**Goal:** To identify individuals at high risk of converting from Mild Cognitive Impairment (MCI) to Alzheimer's Disease using advanced neuroimaging-based computational techniques.
+
+* **Innovate:** Develop a GNN-based technique to classify **progressive MCI (pMCI)** and **stable MCI (sMCI)**.
+* **Analyze:** Enhance predictive performance via **multi-topological connectivity analysis** (Spatial, Spectral, and Directional).
+* **Deploy:** Create a **user-friendly web platform** for clinicians to upload fMRI scans and obtain instant diagnostic insights.
+
+---
+
 ## 🚀 Key Features
 
 * **Multi-Topological Mapping**: Goes beyond static connectivity by integrating three distinct brain network views:
@@ -16,29 +25,47 @@
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ System Architecture: End-to-End Pipeline
 
-The framework operates through a standardized neuroimaging pipeline:
+The framework operates through a standardized neuroimaging pipeline, moving from raw data to clinical insights.
 
-### 1. Data Processing
-* **Standardization**: Raw DICOM data is converted to **NIfTI** format following the **BIDS** standard.
-* **Preprocessing**: Executed via **CONN Toolbox** & **SPM12**, involving realignment, slice-timing correction, spatial normalization (MNI space), and Gaussian smoothing.
-* **Parcellation**: The brain is divided into 116 anatomical regions using the **AAL Atlas**.
+### 1. Data Collection & Preparation
+Data is sourced from the **ADNI (Alzheimer’s Disease Neuroimaging Initiative)** repository. 
+* **Selection Criteria**: Subjects must have both T1-weighted structural MRI (for anatomical mapping) and rs-fMRI (for functional activity).
+* **Format Conversion**: Raw DICOM (.dcm) files are converted to NIfTI (.nii) using **dcm2nii** and organized according to the **BIDS** (Brain Imaging Data Structure) standard.
 
-### 2. Model: NeuroVistaGNN
-The core model processes three parallel graph streams:
-* **Spatial Feature Learning**: Each graph (Pearson, Granger, Wavelet) is processed by independent GATv2 heads.
+### 2. Preprocessing Pipeline
+Executed using **MATLAB**, **SPM12**, and the **CONN Toolbox**, the data undergoes a rigorous cleaning process:
+* **Structural**: Skull stripping, segmentation, and normalization to MNI space.
+* **Functional**: Slice-timing correction, motion realignment, coregistration with T1 images, and spatial smoothing.
+* **Denoising**: Removal of physiological noise and motion artifacts to extract clean BOLD signals.
+
+### 3. ROI Extraction & Graph Construction
+The brain is parcellated into 116 regions using the **AAL Atlas**.
+* **Signal Extraction**: Mean BOLD time-series are extracted for each region.
+* **Graph Modeling**: These signals are transformed into three parallel adjacency matrices (Pearson, Granger, Wavelet), representing the brain as a sequence of weighted graphs.
+
+### 4. Model Inference: NeuroVistaGNN
+The core model processes these graphs through:
+* **Spatial Feature Learning**: Independent GATv2 heads for each connectivity modality.
 * **Feature Fusion**: The MCA module identifies consensus patterns across temporal, spectral, and directional data.
-* **Aggregation**: Node-level representations are aggregated into a graph-level embedding for multi-class classification (CN, EMCI, LMCI, AD).
+* **Early Detection**: Classification into CN, EMCI, LMCI, or AD, with a focus on predicting MCI-to-AD conversion.
 
 ---
+
+## 🖼️ Visual Insights
+
 ### 🖥️ Interface & Analytics
-![Research Suite]()
-*Figure 1: The NeuroVista Research Suite provides a user-friendly dashboard for fMRI analysis and explainable AI insights.*
+![Research Suite](static/images/web-pie)
+![Research Suite](static/images/web-pie)
+*Figure 1: **The NeuroVista Research Suite Dashboard.** This interface allows clinicians to upload preprocessed fMRI data. It provides a real-time diagnostic classification and an "Explainability" panel that highlights the top 10 brain regions contributing to the result.*
 
 ### 🧠 Connectivity Mapping
-![Connectivity Analysis]()
-*Figure 2: Multi-topological mapping of brain functional connectivity, comparing Pearson, Granger, and Wavelet representations.*
+![Connectivity Analysis](/images/conn.png)
+*Figure 2: **Multi-topological Functional Connectivity.** This visualization compares Pearson correlation, frequency-based Wavelet coherence, and directional Granger causality to capture a holistic "fingerprint" of neural dysfunction.*
+
+---
+
 ## 💻 Tech Stack
 
 * **Backend**: Python (Flask)
@@ -46,99 +73,6 @@ The core model processes three parallel graph streams:
 * **Neuroimaging**: Nilearn, Scipy (Signal processing)
 * **Data Analysis**: Statsmodels (VAR models), Joblib
 * **Frontend**: HTML5, Chart.js (Research Suite UI)
+* **Preprocessing Tools**: MATLAB, SPM12, CONN Toolbox
 
 ---
-
-## Project Members
-- Darsana R  
-- Diya Soyi  
-- Helan Lophy  
-- Aparna Sabu  
-
-## Guide
-- Prof. Shijin Knox G U  
-
----
-
-## Research Goal
-To identify individuals who are at risk of converting from Mild Cognitive Impairment (MCI) to Alzheimer's Disease using advanced neuroimaging-based computational techniques.
-
----
-
-## Objectives
-- Develop an innovative machine learning technique to classify **progressive MCI (pMCI)** and **stable MCI (sMCI)**.  
-- Create a **user-friendly web-based platform** allowing clinicians and researchers to upload fMRI scans and obtain classification results.  
-- Enhance predictive performance via **graph-based connectivity analysis** capturing inter-regional brain relationships.
-
----
-
-## Dataset Source
-- Dataset obtained from the ADNI data repository:  
-  ➤ https://ida.loni.usc.edu/pages/access/search.jsp  
-- Imaging modalities used:
-  - **T1-weighted structural MRI**
-  - **Resting-state fMRI (rs-fMRI)**  
-- Includes diagnostic categories:
-  - AD, CN, EMCI, LMCI, MCI
-- Only subjects having both MRI and fMRI were retained.
-
----
-
-## Dataset Preparation Workflow
-1. Download subject-wise data from ADNI.
-2. Extract folders and list unique subject IDs.
-3. Identify and separate:
-   - T1-weighted MRI folders
-   - rs-fMRI folders
-4. Convert DICOM (.dcm) images to NIfTI (.nii) format using **dcm2nii**.
-5. Organize files according to subject identifiers and imaging types.
-
----
-
-## Preprocessing Pipeline
-
-### Tools & Frameworks
-- `MATLAB`
-- `SPM12`
-- `CONN Toolbox`
-
-### Steps Performed
-#### Structural MRI (T1-weighted)
-- Skull stripping  
-- Segmentation  
-- Spatial normalization to MNI space  
-
-#### Resting-state fMRI
-- Slice timing correction  
-- Motion correction and realignment  
-- Coregistration with T1 image  
-- Normalization to MNI  
-- Smoothing  
-- Artifact/Noise removal  
-- Confound estimation  
-
-#### Final Outputs
-- Preprocessed fMRI time series  
-- Normalized structural images  
-- Data ready for connectivity and machine learning analysis  
-
----
-
-## Future Work
-- Construction of functional connectivity networks  
-- Graph-theoretical biomarker extraction  
-- Machine learning classification of sMCI vs pMCI  
-- Deployment of a web-based prediction platform  
-
----
-
-## Repository Contents
-- Scripts for data filtering and preprocessing  
-- Utility codes for conversion and folder organization  
-- Documentation for data handling pipeline  
-
----
-
-## Contribution / Issues
-Feel free to open an issue or pull request for improvements or discussions.
-
