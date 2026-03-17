@@ -1,6 +1,51 @@
-# Neurovista: Early Detection of Alzheimer's Disease using MRI and fMRI (ongoing)
+# 🧠 NeuroVista: Multi-Modal GNN for Early Alzheimer’s Detection
 
-This project focuses on early diagnosis and progression prediction of Alzheimer's Disease by analyzing neuroimaging data from ADNI. The work includes preprocessing, connectivity analysis, and machine learning-based classification of stable and progressive MCI.
+**NeuroVista** is a cutting-edge deep learning framework designed for the early prognosis of Alzheimer’s Disease (AD). By leveraging **Graph Neural Networks (GNNs)** and **resting-state fMRI (rs-fMRI)** data, the system identifies subtle disruptions in brain network topology to differentiate between cognitive stages and predict the conversion from Mild Cognitive Impairment (MCI) to AD.
+
+---
+
+## 🚀 Key Features
+
+* **Multi-Topological Mapping**: Goes beyond static connectivity by integrating three distinct brain network views:
+    * **Pearson Correlation**: Captures static functional synchronization.
+    * **Spectral Coherence**: Captures frequency-domain rhythmic interactions (0.01–0.1 Hz).
+    * **Granger Causality**: Captures directional, effective connectivity via Vector Autoregressive (VAR) modeling.
+* **Advanced GNN Architecture**: Uses **GATv2** layers to dynamically weigh the importance of neural connections and **Multiplex Cross-Attention (MCA)** to fuse information across modalities.
+* **Explainable AI (XAI)**: Integrated attentional pooling and NIfTI-based heatmapping to pinpoint specific brain regions (AAL-116) driving the diagnosis.
+* **Clinical Relevance**: Specifically tuned to distinguish between **Stable MCI (sMCI)** and **Progressive MCI (pMCI)** for timely clinical intervention.
+
+---
+
+## 🏗️ System Architecture
+
+The framework operates through a standardized neuroimaging pipeline:
+
+### 1. Data Processing
+* **Standardization**: Raw DICOM data is converted to **NIfTI** format following the **BIDS** standard.
+* **Preprocessing**: Executed via **CONN Toolbox** & **SPM12**, involving realignment, slice-timing correction, spatial normalization (MNI space), and Gaussian smoothing.
+* **Parcellation**: The brain is divided into 116 anatomical regions using the **AAL Atlas**.
+
+### 2. Model: NeuroVistaGNN
+The core model processes three parallel graph streams:
+* **Spatial Feature Learning**: Each graph (Pearson, Granger, Wavelet) is processed by independent GATv2 heads.
+* **Feature Fusion**: The MCA module identifies consensus patterns across temporal, spectral, and directional data.
+* **Aggregation**: Node-level representations are aggregated into a graph-level embedding for multi-class classification (CN, EMCI, LMCI, AD).
+
+---
+### 🖥️ Interface & Analytics
+![Research Suite]()
+*Figure 1: The NeuroVista Research Suite provides a user-friendly dashboard for fMRI analysis and explainable AI insights.*
+
+### 🧠 Connectivity Mapping
+![Connectivity Analysis]()
+*Figure 2: Multi-topological mapping of brain functional connectivity, comparing Pearson, Granger, and Wavelet representations.*
+## 💻 Tech Stack
+
+* **Backend**: Python (Flask)
+* **Deep Learning**: PyTorch, PyTorch Geometric (PyG)
+* **Neuroimaging**: Nilearn, Scipy (Signal processing)
+* **Data Analysis**: Statsmodels (VAR models), Joblib
+* **Frontend**: HTML5, Chart.js (Research Suite UI)
 
 ---
 
