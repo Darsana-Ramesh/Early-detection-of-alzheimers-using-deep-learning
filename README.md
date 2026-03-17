@@ -48,7 +48,7 @@ The brain is parcellated into 116 regions using the **AAL Atlas**.
 ### 4. Model Inference: NeuroVistaGNN
 The core model processes these graphs through:
 
-![Architecture](Images/arch-.png)
+![Architecture](Images/archi-.png)
 
 * **Spatial Feature Learning**: Independent GATv2 heads for each connectivity modality.
 * **Feature Fusion**: The MCA module identifies consensus patterns across temporal, spectral, and directional data.
