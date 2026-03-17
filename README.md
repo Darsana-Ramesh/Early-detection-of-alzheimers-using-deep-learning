@@ -1,10 +1,10 @@
-# 🧠 NeuroVista: Multi-Modal GNN for Early Alzheimer’s Detection
+# NeuroVista: Multi-Modal GNN for Early Alzheimer’s Detection
 
 **NeuroVista** is a cutting-edge deep learning framework designed for the early prognosis of Alzheimer’s Disease (AD). By leveraging **Graph Neural Networks (GNNs)** and **resting-state fMRI (rs-fMRI)** data, the system identifies subtle disruptions in brain network topology to differentiate between cognitive stages and predict the conversion from Mild Cognitive Impairment (MCI) to AD.
 
 ---
 
-## 🎯 Research Goal & Objectives
+## Research Goal & Objectives
 **Goal:** To identify individuals at high risk of converting from Mild Cognitive Impairment (MCI) to Alzheimer's Disease using advanced neuroimaging-based computational techniques.
 
 * **Innovate:** Develop a GNN-based technique to classify **progressive MCI (pMCI)** and **stable MCI (sMCI)**.
@@ -13,7 +13,7 @@
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 * **Multi-Topological Mapping**: Goes beyond static connectivity by integrating three distinct brain network views:
     * **Pearson Correlation**: Captures static functional synchronization.
@@ -25,7 +25,7 @@
 
 ---
 
-## 🏗️ System Architecture: End-to-End Pipeline
+## System Architecture: End-to-End Pipeline
 
 The framework operates through a standardized neuroimaging pipeline, moving from raw data to clinical insights.
 
@@ -47,16 +47,19 @@ The brain is parcellated into 116 regions using the **AAL Atlas**.
 
 ### 4. Model Inference: NeuroVistaGNN
 The core model processes these graphs through:
+
+![Architecture](images/arch-.png)
+
 * **Spatial Feature Learning**: Independent GATv2 heads for each connectivity modality.
 * **Feature Fusion**: The MCA module identifies consensus patterns across temporal, spectral, and directional data.
 * **Early Detection**: Classification into CN, EMCI, LMCI, or AD, with a focus on predicting MCI-to-AD conversion.
 
 ---
 
-## 🖼️ Visual Insights
+## Visual Insights
 
-### 🖥️ Interface & Analytics
-![Research Suite](static/images/web-res.png)
+### Interface & Analytics
+![Research Suite](images/web-res.png)
 
 *Figure 1: **The NeuroVista Research Suite Dashboard.** This interface allows clinicians to upload preprocessed fMRI data. It provides a real-time diagnostic classification and an "Explainability" panel that highlights the top 10 brain regions contributing to the result.*
 
