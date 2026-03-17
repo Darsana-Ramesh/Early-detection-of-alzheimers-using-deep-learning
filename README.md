@@ -2,6 +2,11 @@
 
 **NeuroVista** is a cutting-edge deep learning framework designed for the early prognosis of Alzheimer’s Disease (AD). By leveraging **Graph Neural Networks (GNNs)** and **resting-state fMRI (rs-fMRI)** data, the system identifies subtle disruptions in brain network topology to differentiate between cognitive stages and predict the conversion from Mild Cognitive Impairment (MCI) to AD.
 
+## 👥 Project Team
+* **Members**: Darsana R, Diya Soyi, Helan Lophy, Aparna Sabu
+* **Guide**: Prof. Shijin Knox G U
+* **Institution**: Government Engineering College Palakkad
+
 ---
 
 ## Research Goal & Objectives
