@@ -48,7 +48,7 @@ The brain is parcellated into 116 regions using the **AAL Atlas**.
 ### 4. Model Inference: NeuroVistaGNN
 The core model processes these graphs through:
 
-![Architecture](images/arch-.png)
+![Architecture](Images/arch-.png)
 
 * **Spatial Feature Learning**: Independent GATv2 heads for each connectivity modality.
 * **Feature Fusion**: The MCA module identifies consensus patterns across temporal, spectral, and directional data.
@@ -59,7 +59,7 @@ The core model processes these graphs through:
 ## Visual Insights
 
 ### Interface & Analytics
-![Research Suite](images/web-res.png)
+![Research Suite](Images/web-res.png)
 
 *Figure 1: **The NeuroVista Research Suite Dashboard.** This interface allows clinicians to upload preprocessed fMRI data. It provides a real-time diagnostic classification and an "Explainability" panel that highlights the top 10 brain regions contributing to the result.*
 
