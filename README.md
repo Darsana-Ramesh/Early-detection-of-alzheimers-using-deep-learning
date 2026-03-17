@@ -25,7 +25,7 @@
     * **Spectral Coherence**: Captures frequency-domain rhythmic interactions (0.01–0.1 Hz).
     * **Granger Causality**: Captures directional, effective connectivity via Vector Autoregressive (VAR) modeling.
 * **Advanced GNN Architecture**: Uses **GATv2** layers to dynamically weigh the importance of neural connections and **Multiplex Cross-Attention (MCA)** to fuse information across modalities.
-* **Explainable AI (XAI)**: Integrated attentional pooling and NIfTI-based heatmapping to pinpoint specific brain regions (AAL-116) driving the diagnosis.
+* **Explainable AI (XAI)**: It provides a real-time diagnostic classification and an "Explainability" panel that highlights the top 10 brain regions contributing to the result.
 * **Clinical Relevance**: Specifically tuned to distinguish between **Stable MCI (sMCI)** and **Progressive MCI (pMCI)** for timely clinical intervention.
 
 ---
