@@ -56,12 +56,12 @@ The core model processes these graphs through:
 ## 🖼️ Visual Insights
 
 ### 🖥️ Interface & Analytics
-![Research Suite](static/images/web-pie)
-![Research Suite](static/images/web-pie)
+![Research Suite](static/images/web-res.png)
+
 *Figure 1: **The NeuroVista Research Suite Dashboard.** This interface allows clinicians to upload preprocessed fMRI data. It provides a real-time diagnostic classification and an "Explainability" panel that highlights the top 10 brain regions contributing to the result.*
 
 ### 🧠 Connectivity Mapping
-![Connectivity Analysis](/images/conn.png)
+![Connectivity Analysis](/conn.png)
 *Figure 2: **Multi-topological Functional Connectivity.** This visualization compares Pearson correlation, frequency-based Wavelet coherence, and directional Granger causality to capture a holistic "fingerprint" of neural dysfunction.*
 
 ---
