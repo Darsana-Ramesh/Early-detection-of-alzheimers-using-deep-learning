@@ -1,6 +1,12 @@
-# NeuroVista: Multi-Modal GNN for Early Alzheimer’s Detection
+# Neurovista: A Deep Learning Framework for Early Detection of Alzheimer’s Disease using fMRI
 
-**NeuroVista** is a cutting-edge deep learning framework designed for the early prognosis of Alzheimer’s Disease (AD). By leveraging **Graph Neural Networks (GNNs)** and **resting-state fMRI (rs-fMRI)** data, the system identifies subtle disruptions in brain network topology to differentiate between cognitive stages and predict the conversion from Mild Cognitive Impairment (MCI) to AD.
+Neurovista is a deep learning framework designed for the early prognosis of Alzheimer’s Disease (AD). Here, “early” refers to the pre-dementia phase—when patients are still in the Mild Cognitive Impairment (MCI) stage, often years before clinical Alzheimer’s is diagnosed and before significant, irreversible brain damage occurs.
+
+At this stage, traditional diagnosis struggles because symptoms are subtle and progression is uncertain—not all MCI patients develop AD. NeuroVista addresses this challenge by focusing on disease progression, specifically distinguishing between stable MCI (sMCI) and progressive MCI (pMCI).
+
+By leveraging Graph Neural Networks (GNNs) and resting-state fMRI (rs-fMRI) data, the system models the brain as a connectivity graph and captures subtle disruptions in functional network topology. These changes—often invisible in conventional analysis—serve as early indicators of neurodegeneration.
+
+Through this approach, NeuroVista not only differentiates between cognitive stages (CN, MCI, AD) but also predicts which MCI patients are likely to convert to Alzheimer’s within a given time horizon, enabling earlier intervention, better patient monitoring, and more informed clinical decision-making.
 
 ## 👥 Project Team
 * **Members**: Darsana R, Diya Soyi, Helan Lophy, Aparna Sabu
