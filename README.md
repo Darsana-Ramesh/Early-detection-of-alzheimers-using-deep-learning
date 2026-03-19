@@ -1,121 +1,133 @@
-## 🚀 What is NeuroVista?
-
-**NeuroVista** is a deep learning system that predicts **whether a person with Mild Cognitive Impairment (MCI) will develop Alzheimer’s Disease**.
-
-Instead of just detecting Alzheimer’s after it happens, NeuroVista tries to answer a more important question:
-
-> **“Who is likely to develop Alzheimer’s in the future?”**
+# NeuroVista: Early Alzheimer’s Prognosis using Deep Learning
 
 ---
 
-## ❗ Why does this matter?
+## Overview
 
-Alzheimer’s develops slowly over years.
+**NeuroVista** is a deep learning framework designed for the **early prognosis of Alzheimer’s Disease (AD)**.
 
-- Many patients are first diagnosed with **MCI (Mild Cognitive Impairment)**
-- But **not all MCI patients develop Alzheimer’s**
-- Doctors currently **cannot reliably predict progression**
+By focusing on the **Mild Cognitive Impairment (MCI)** stage, NeuroVista identifies:
+- **High-risk patients (pMCI)** → likely to progress to Alzheimer’s  
+- **Stable patients (sMCI)** → unlikely to progress  
 
-👉 This is where NeuroVista helps.
-
----
-
-## 💡 What does NeuroVista do?
-
-NeuroVista:
-- Analyzes **brain activity (fMRI scans)**
-- Studies how different brain regions **communicate with each other**
-- Learns patterns that indicate **early disease progression**
-
-### 🎯 It can:
-- Classify patients as:
-  - Normal (CN)
-  - Stable MCI (sMCI)
-  - Progressive MCI (pMCI)
-  - Alzheimer’s (AD)
-- Predict if an MCI patient will **convert to Alzheimer’s**
+This prediction is made **years before irreversible brain damage occurs**, enabling early intervention.
 
 ---
 
-## 🧠 How does it work? (Simple View)
+## The Challenge
 
-1. **Brain Scan Input (fMRI)**
-   - Captures brain activity over time
+Traditional diagnostic methods struggle to:
+- Distinguish between **Stable MCI (sMCI)** and **Progressive MCI (pMCI)**
+- Capture subtle, early-stage brain changes  
 
-2. **Build Brain Network**
-   - Brain is treated like a **graph**
-   - Regions = nodes  
-   - Connections = edges  
-
-3. **Deep Learning Model (GNN)**
-   - Learns how brain connections change
-   - Detects abnormal patterns
-
-4. **Prediction**
-   - Outputs diagnosis + future risk
+NeuroVista addresses this by modeling the brain as a **dynamic functional network** using **Graph Neural Networks (GNNs)**.
 
 ---
 
-## 🔬 What makes it different?
+## Key Innovations
 
-Instead of using just one type of brain connection, NeuroVista combines three:
-
-- **Correlation** → Which regions activate together  
-- **Frequency patterns** → How signals behave over time  
-- **Causality** → Which region influences another  
-
-👉 This gives a **more complete picture of brain function**
+### Multi-Topological Mapping
+Captures brain connectivity from multiple perspectives:
+- **Pearson Correlation (Spatial)** → Functional synchronization  
+- **Spectral Coherence (Frequency)** → Rhythmic interactions (0.01–0.1 Hz)  
+- **Granger Causality (Directional)** → Effective connectivity  
 
 ---
 
-## 📊 Results
-
-- **Accuracy:** 80.91%  
-- **ROC-AUC:** 0.9167  
-
-### sMCI vs pMCI Prediction
-
-| Class | Precision | Recall | F1-Score |
-|------|----------|--------|----------|
-| sMCI | 0.79     | 0.84   | 0.81     |
-| pMCI | 0.83     | 0.78   | 0.80     |
-
-✅ Shows strong ability to identify **high-risk patients early**
+### GATv2 Architecture
+- Uses **attention mechanisms**  
+- Learns importance of different brain regions dynamically  
 
 ---
 
-## 🖥️ Demo
-
-### 📊 Web Interface
-![Dashboard](Images/web-res.png)
-
-- Upload scan  
-- Get prediction instantly  
-- View important brain regions  
+### Explainable AI (XAI)
+- Identifies **top 10 brain regions** influencing predictions  
+- Provides **clinical transparency**
 
 ---
 
-## 🏗️ Architecture (High-Level)
+## System Architecture
 
 ![Architecture](Images/archi-.png)
 
-- Converts brain signals → graphs  
-- Uses **Graph Neural Networks (GNNs)**  
-- Combines multiple brain connectivity views  
+The NeuroVista pipeline transforms raw fMRI data into clinical insights through the following stages:
 
 ---
 
-## 🛠️ Tech Stack
+### Preprocessing & Denoising
+Using **MATLAB, SPM12, and CONN Toolbox**:
 
-- **Deep Learning**: PyTorch, PyTorch Geometric  
-- **Backend**: Flask  
-- **Frontend**: HTML, Chart.js  
-- **Neuroimaging**: Nilearn, SPM, CONN  
+- Convert **DICOM → NIfTI (BIDS standard)**  
+- Structural processing:
+  - Skull stripping  
+  - Normalization to MNI space  
+- Functional processing:
+  - Slice-timing correction  
+  - Motion realignment  
+  - Spatial smoothing  
 
 ---
 
-## 👥 Team
+### ROI Extraction & Graph Construction
 
+- Brain divided into **116 regions (AAL Atlas)**  
+- Extract **mean BOLD time-series**  
+
+Construct three connectivity matrices:
+- **Pearson Correlation** → Static connectivity  
+- **Spectral Coherence** → Frequency-based connectivity  
+- **Granger Causality** → Directional connectivity  
+
+---
+
+### 3️Model Inference: NeuroVistaGNN
+
+- Processes graphs using **GATv2 layers**  
+- Uses **Multiplex Cross-Attention (MCA)** for fusion  
+- Learns complex brain connectivity patterns  
+
+---
+
+## Performance Results
+
+### Overall Metrics
+- **Accuracy:** 80.91%  
+- **ROC-AUC:** 0.9167  
+
+---
+
+### MCI Conversion Prediction (sMCI vs pMCI)
+
+| Class | Precision | Recall | F1-Score |
+|------|----------|--------|----------|
+| Stable MCI (sMCI) | 0.79 | 0.84 | 0.81 |
+| Progressive MCI (pMCI) | 0.83 | 0.78 | 0.80 |
+
+Demonstrates strong ability to identify **high-risk patients early**
+
+---
+
+## Web Interface
+
+The **NeuroVista Research Suite** allows clinicians to:
+- Upload preprocessed fMRI scans  
+- Receive **instant diagnostic predictions**  
+- View **explainability insights**
+
+![Dashboard](Images/web-res.png)
+
+## Tech Stack
+
+- **Deep Learning**: PyTorch, PyTorch Geometric (PyG)  
+- **Neuroimaging**: Nilearn, SciPy, Statsmodels  
+- **Backend**: Flask (Python)  
+- **Frontend**: HTML5, Chart.js  
+- **Preprocessing**: MATLAB, SPM12, CONN Toolbox  
+
+---
+## Project Team
+
+**Members:**
 - Darsana R  
 - Diya Soyi  
 - Helan Lophy  
