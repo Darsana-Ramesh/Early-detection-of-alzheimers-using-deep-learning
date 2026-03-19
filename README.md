@@ -8,9 +8,9 @@ By leveraging Graph Neural Networks (GNNs) and resting-state fMRI (rs-fMRI) data
 
 Through this approach, NeuroVista not only differentiates between cognitive stages (CN, MCI, AD) but also predicts which MCI patients are likely to convert to Alzheimer’s within a given time horizon, enabling earlier intervention, better patient monitoring, and more informed clinical decision-making.
 
-## 👥 Project Team
+## Project Team
 * **Members**: Darsana R, Diya Soyi, Helan Lophy, Aparna Sabu
-* **Guide**: Prof. Shijin Knox G U
+* **Guide**: Prof. Shijin Knox G. U.
 * **Institution**: Government Engineering College Palakkad
 
 ---
