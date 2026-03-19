@@ -56,7 +56,7 @@ NeuroVista combines three types of brain connections:
 - **Pearson Correlation** → Which regions activate together  
 - **Spectral Coherence** → Frequency-based activity patterns  
 - **Granger Causality** → Direction of information flow
--  
+
 This gives a **complete picture of brain function**
 
 ---
