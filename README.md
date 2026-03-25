@@ -154,7 +154,7 @@ The NeuroVista dashboard allows:
 
 ## Connectivity Visualization
 
-![Connectivity](conn.png)
+![Connectivity](images/3view.png)
 
 Shows different brain connectivity views:
 - Correlation  
