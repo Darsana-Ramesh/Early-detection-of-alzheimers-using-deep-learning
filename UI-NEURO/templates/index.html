@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroVista AI | Research Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --primary: #0d9488;
+  --primary-dark: #0f766e;
+  --primary-light: #ccfbf1;
+  --secondary: #0f172a;
+  --text-light: #64748b;
+  --bg: #fcfcfc;
+  --glass: rgba(255,255,255,0.95);
+  --cn: #16a34a; --cn-bg: #f0fdf4; --cn-border: #bbf7d0;
+  --mci: #d97706; --mci-bg: #fffbeb; --mci-border: #fde68a;
+  --ad: #dc2626; --ad-bg: #fef2f2; --ad-border: #fecaca;
+  --border: #e2e8f0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', -apple-system, sans-serif; color: var(--secondary); background: var(--bg); overflow-x: hidden; line-height: 1.6; scroll-behavior: smooth; }
+
+nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 8%; background: var(--glass); backdrop-filter: blur(10px); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #eee; }
+.logo { font-size: 1.4rem; font-weight: 800; color: var(--secondary); text-decoration: none; }
+.logo span { color: var(--primary); }
+.nav-links { display: flex; gap: 8px; }
+.nav-links a { text-decoration: none; color: var(--text-light); font-weight: 500; font-size: 0.9rem; transition: 0.2s; padding: 6px 14px; border-radius: 8px; }
+.nav-links a:hover { color: var(--primary); background: #f0fdfa; }
+
+header.hero { padding: 160px 8% 100px; text-align: center; background: radial-gradient(circle at top right, #f0fdfa, #ffffff); }
+.hero h1 { font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 800; margin: 0 auto 20px; max-width: 900px; letter-spacing: -2px; line-height: 1.1; }
+.hero h1 span { color: var(--primary); }
+.hero p { font-size: 1.1rem; color: var(--text-light); max-width: 620px; margin: 0 auto 40px; line-height: 1.75; }
+.btn-glow { background: var(--primary); color: white; padding: 16px 42px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(13,148,136,0.2); transition: all 0.3s; font-size: 1rem; font-family: 'Inter', sans-serif; display: inline-block; text-decoration: none; }
+.btn-glow:hover { background: var(--primary-dark); box-shadow: 0 14px 28px rgba(13,148,136,0.3); transform: translateY(-1px); }
+.btn-glow.dark { background: var(--secondary); box-shadow: 0 10px 20px rgba(15,23,42,0.15); }
+.btn-glow.dark:hover { background: #1e293b; }
+.btn-glow.small { padding: 10px 20px; font-size: 0.85rem; }
+
+.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; padding: 0 8% 90px; }
+.f-card { padding: 38px; border-radius: 24px; background: white; border: 1px solid rgba(13,148,136,0.15); transition: 0.3s; }
+.f-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); border-color: rgba(13,148,136,0.35); }
+.f-card .icon { font-size: 2.2rem; margin-bottom: 18px; display: block; }
+.f-card h3 { margin: 0 0 12px; font-size: 1.15rem; font-weight: 700; }
+.f-card p { font-size: 0.9rem; color: var(--text-light); margin: 0; line-height: 1.65; }
+
+.workspace-container { padding: 80px 8%; }
+.workspace-container:nth-child(even) { background: #f8fafc; }
+.section-label { display: inline-flex; align-items: center; background: var(--primary-light); color: var(--primary-dark); padding: 5px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; font-family: 'JetBrains Mono', monospace; }
+.section-heading { font-size: 1.9rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
+.section-heading span { color: var(--primary); }
+.section-desc { font-size: 0.92rem; color: var(--text-light); margin-bottom: 36px; max-width: 520px; }
+
+.workspace { max-width: 1100px; margin: 0 auto; background: white; border-radius: 28px; box-shadow: 0 30px 80px rgba(0,0,0,0.07); padding: 50px; border: 1px solid #f1f5f9; }
+
+.upload-area { border: 2px dashed #e2e8f0; border-radius: 20px; padding: 52px 40px; text-align: center; background: #fafafa; cursor: pointer; transition: 0.3s; margin-bottom: 24px; }
+.upload-area:hover { border-color: var(--primary); background: #f0fdfa; }
+.upload-icon { width: 52px; height: 52px; border: 1.5px solid #e2e8f0; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; background: white; transition: 0.3s; }
+.upload-area:hover .upload-icon { border-color: var(--primary); background: var(--primary-light); }
+.upload-icon svg { width: 22px; height: 22px; stroke: var(--text-light); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: 0.3s; }
+.upload-area:hover .upload-icon svg { stroke: var(--primary); }
+.upload-lbl { font-size: 0.9rem; color: var(--text-light); }
+.upload-lbl strong { color: var(--secondary); font-weight: 600; }
+.file-input-custom { display: none; }
+
+.action-row { display: flex; align-items: center; gap: 14px; }
+
+.loader-container { display: none; align-items: center; gap: 10px; }
+.loader { width: 18px; height: 18px; border: 2.5px solid #e2e8f0; border-top: 2.5px solid var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { font-size: 0.85rem; color: var(--text-light); font-weight: 500; }
+
+.results-view { display: none; margin-top: 40px; animation: fadeInUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.results-divider { height: 1px; background: var(--border); margin-bottom: 36px; }
+.res-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+/* ── Diagnostic result card ── */
+.diag-card { border: 1px solid var(--border); border-radius: 20px; overflow: hidden; background: white; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+.diag-card-header { padding: 14px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: #f8fafc; }
+.diag-card-title { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; transition: background 0.4s; }
+.diag-card-body { padding: 28px 22px; display: flex; flex-direction: column; align-items: center; gap: 18px; min-height: 300px; justify-content: center; }
+.ring-wrap { position: relative; width: 180px; height: 180px; flex-shrink: 0; }
+.ring-wrap canvas { position: absolute; top: 0; left: 0; }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-val { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; transition: color 0.4s; }
+.ring-sublabel { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); margin-top: 5px; }
+.class-pills { display: flex; gap: 7px; }
+.cpill { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.06em; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; color: #94a3b8; transition: all 0.3s; }
+.cpill.active-cn  { background: var(--cn-bg);  border-color: var(--cn-border);  color: var(--cn);  font-weight: 600; }
+.cpill.active-mci { background: var(--mci-bg); border-color: var(--mci-border); color: var(--mci); font-weight: 600; }
+.cpill.active-ad  { background: var(--ad-bg);  border-color: var(--ad-border);  color: var(--ad);  font-weight: 600; }
+
+/* ── MCI progression result ── */
+.prog-inline-res { margin-top: 16px; padding: 14px 18px; background: white; border: 2px solid #fcd34d; border-radius: 10px; font-family: 'JetBrains Mono', monospace; text-align: center; display: none; }
+.prog-inline-res.visible { display: block; animation: fadeInUp 0.4s ease; }
+
+/* ── Panels ── */
+.panel { background: white; border: 1px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+.panel-h { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); margin-bottom: 14px; }
+.region-list { max-height: 118px; overflow-y: auto; }
+.region-list div { font-size: 0.8rem; color: var(--secondary); padding: 5px 0; border-bottom: 1px solid #f8fafc; display: flex; align-items: center; gap: 8px; }
+.region-list div::before { content: ''; width: 5px; height: 5px; background: var(--primary); border-radius: 50%; flex-shrink: 0; opacity: 0.6; }
+.region-list::-webkit-scrollbar { width: 3px; }
+.region-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+/* ── Brain map panel ── */
+.brain-panel { border: 1px solid var(--border); border-radius: 20px; overflow: hidden; background: white; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+.brain-panel-header { padding: 14px 22px; border-bottom: 1px solid var(--border); background: #f8fafc; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.brain-panel-title { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); }
+.brain-panel-note { font-size: 0.75rem; color: var(--text-light); }
+
+/* ── Prognostic result card ── */
+.prog-result-card { background: white; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+.prog-result-body { padding: 28px 24px; }
+.prog-class-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-light); margin-bottom: 8px; }
+.prog-val { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px; }
+.conf-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-light); }
+
+/* ── Footer ── */
+footer { background: var(--secondary); color: #94a3b8; padding: 60px 8% 36px; text-align: center; }
+.footer-inner { max-width: 600px; margin: 0 auto; }
+.footer-logo { color: white; font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+.footer-logo span { color: var(--primary); }
+.footer-desc { font-size: 0.88rem; line-height: 1.7; margin-bottom: 28px; }
+.footer-note { font-size: 0.78rem; border-top: 1px solid #1e293b; padding-top: 24px; margin-top: 24px; }
+
+@media (max-width: 768px) {
+  .features { grid-template-columns: 1fr; }
+  .res-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="logo">NEURO<span>VISTA</span></a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#workspace">Diagnostic</a>
+    <a href="#prog-workspace">Prognostic</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <h1>AI-Powered <span>Brain Health</span> Analysis</h1>
+  <p>NeuroVista uses advanced Graph Neural Networks to analyze brain scan data and detect early signs of Alzheimer's disease. Our system helps identify risks at an early stage for better clinical decisions.</p>
+  <a href="#workspace" class="btn-glow">Start Brain Analysis</a>
+</header>
+
+<section class="features" id="features">
+  <div class="f-card">
+   
+    <h3>Multi-View Brain Analysis</h3>
+    <p>We examine brain activity from multiple perspectives — axial and coronal — to detect subtle changes in communication between brain regions. This improves accuracy and early detection.</p>
+  </div>
+  <div class="f-card">
+
+    <h3>Detailed Brain Region Tracking</h3>
+    <p>Our system studies 116 important AAL atlas brain regions to identify areas linked to memory, thinking, and cognitive health, highlighting the top supporting regions for every prediction.</p>
+  </div>
+  <div class="f-card">
+   
+    <h3>Risk Progression Assessment</h3>
+    <p>For patients with Mild Cognitive Impairment (MCI), we estimate whether the condition is stable or may progress to Alzheimer's, helping guide early medical intervention.</p>
+  </div>
+</section>
+
+<!-- ── DIAGNOSTIC ── -->
+<div class="workspace-container" id="workspace">
+  <div style="max-width:1100px;margin:0 auto 32px;">
+    <div class="section-label">Module 01</div>
+    <h2 class="section-heading">Diagnostic <span>Classification</span></h2>
+    <p class="section-desc">Upload a subject's fMRI timeseries (.npy) to classify as Alzheimer's Disease, Mild Cognitive Impairment, or Cognitively Normal.</p>
+  </div>
+  <div class="workspace">
+    <div class="upload-area" onclick="document.getElementById('diagInput').click()">
+      <div class="upload-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 11l5-5 5 5M12 6v10"/></svg>
+      </div>
+      <div id="diagLabel" class="upload-lbl">Drop or select <strong>.npy</strong> file — AD / MCI / CN classification</div>
+      <input type="file" id="diagInput" class="file-input-custom" onchange="handleFileChange(this,'diagLabel')">
+    </div>
+    <div class="action-row">
+      <button class="btn-glow" onclick="runDiagnostic()">Run Diagnosis</button>
+      <div id="diagLoader" class="loader-container"><div class="loader"></div><span class="loader-text">Analyzing timeseries…</span></div>
+    </div>
+
+    <div id="diagResults" class="results-view">
+      <div class="results-divider"></div>
+
+      <!-- Row 1: Diagnostic Result + Modality Evidence -->
+      <div class="res-grid" style="margin-bottom:20px;">
+        <div class="diag-card">
+          <div class="diag-card-header">
+            <span class="diag-card-title">Diagnostic Result</span>
+            <div id="statusDot" class="status-dot"></div>
+          </div>
+          <div class="diag-card-body">
+            <div class="ring-wrap">
+              <canvas id="ringCanvas" width="180" height="180" style="width:180px;height:180px;"></canvas>
+              <div class="ring-center">
+                <div class="ring-val" id="resVal">--</div>
+                <div class="ring-sublabel">prediction</div>
+              </div>
+            </div>
+            <div class="class-pills">
+              <div class="cpill" id="pill-cn">CN</div>
+              <div class="cpill" id="pill-mci">MCI</div>
+              <div class="cpill" id="pill-ad">AD</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="display:flex;flex-direction:column;justify-content:center;min-height:300px;">
+          <div class="panel-h">Modality Evidence</div>
+          <div style="position:relative;height:260px;width:100%;">
+            <canvas id="diagChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: MCI panel (only when MCI detected) -->
+      <div id="autoProgPanel" style="display:none;margin-bottom:20px;">
+        <div style="background:#fffbeb;border:2px solid #fcd34d;border-radius:16px;padding:20px 24px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">⚠️</div>
+              <div>
+                <div style="font-size:1rem;font-weight:700;color:#92400e;">MCI Detected</div>
+                <div style="font-size:0.83rem;color:#b45309;margin-top:2px;line-height:1.4;">Progression to Alzheimer's risk identified — further analysis recommended</div>
+              </div>
+            </div>
+            <button onclick="checkProgression()"
+              style="background:#d97706;color:#fff;border:none;border-radius:10px;padding:12px 24px;font-size:0.88rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(217,119,6,0.4);white-space:nowrap;font-family:'Inter',sans-serif;flex-shrink:0;"
+              onmouseover="this.style.background='#b45309'" onmouseout="this.style.background='#d97706'">
+              Analyze Progression Risk →
+            </button>
+          </div>
+          <div id="autoProgResult" class="prog-inline-res"></div>
+        </div>
+      </div>
+
+      <!-- Row 3: Brain Activation Map -->
+      <div class="brain-panel">
+        <div class="brain-panel-header">
+          <span class="brain-panel-title">Brain Activation Map — Top 10 Supporting Regions</span>
+          <span class="brain-panel-note">Numbered markers = GNN attention weight &nbsp;|&nbsp; See region key below</span>
+        </div>
+        <div id="diag-brain-heatmap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PROGNOSTIC ── -->
+<div class="workspace-container" id="prog-workspace">
+  <div style="max-width:1100px;margin:0 auto 32px;">
+    <div class="section-label">Module 02</div>
+    <h2 class="section-heading">Prognostic <span>Lab</span></h2>
+    <p class="section-desc">For MCI subjects, estimate whether cognitive impairment is stable (sMCI) or likely to progress toward Alzheimer's (pMCI).</p>
+  </div>
+  <div class="workspace">
+    <div class="upload-area" onclick="document.getElementById('progInput').click()">
+      <div class="upload-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 017 7h1M15 7h1a5 5 0 010 10h-1M9 12h6"/></svg>
+      </div>
+      <div id="progLabel" class="upload-lbl">Drop or select <strong>.npy</strong> file for progression risk analysis</div>
+      <input type="file" id="progInput" class="file-input-custom" onchange="handleFileChange(this,'progLabel')">
+    </div>
+    <div class="action-row">
+      <button class="btn-glow dark" onclick="runDirectPrognosis()">Run Progression Analysis</button>
+      <div id="progLoader" class="loader-container"><div class="loader"></div><span class="loader-text">Analyzing…</span></div>
+    </div>
+
+    <div id="directProgResults" class="results-view">
+      <div class="results-divider"></div>
+      <div class="res-grid" style="margin-bottom:24px;">
+        <div class="prog-result-card">
+          <div class="diag-card-header">
+            <span class="diag-card-title">Progression Outlook</span>
+          </div>
+          <div class="prog-result-body">
+            <div class="prog-class-label">Progression Outlook</div>
+            <div class="prog-val" id="directProgVal">--</div>
+            <div id="directProgDesc" style="font-size:0.85rem;color:#374151;line-height:1.6;margin-top:4px;"></div>
+          </div>
+        </div>
+        <div class="panel" style="display:flex;flex-direction:column;justify-content:center;min-height:240px;">
+          <div class="panel-h">Risk Drivers</div>
+          <div style="position:relative;height:200px;width:100%;">
+            <canvas id="progChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="brain-panel">
+        <div class="brain-panel-header">
+          <span class="brain-panel-title">Brain Activation Map — Top 10 Risk Regions</span>
+          <span class="brain-panel-note">Numbered markers = GNN attention weight &nbsp;|&nbsp; See region key below</span>
+        </div>
+        <div id="prog-brain-heatmap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">NEURO<span>VISTA</span></div>
+    <p class="footer-desc">An AI-powered clinical research tool for early detection and risk assessment of neurodegenerative conditions using Graph Neural Network architectures on fMRI timeseries data.</p>
+    <p class="footer-note">For research use only. &copy; 2025 NeuroVista AI Research Suite.</p>
+  </div>
+</footer>
+
+<script>
+let diagChartInstance = null, progChartInstance = null, ringChart = null, currentPath = "";
+
+const CLASS_COLORS = {
+  CN:  { color: '#16a34a' },
+  MCI: { color: '#d97706' },
+  AD:  { color: '#dc2626' },
+};
+
+function getClass(pred) {
+  const p = (pred || '').toUpperCase();
+  if (p.includes('AD') && !p.includes('MCI')) return 'AD';
+  if (p.includes('MCI')) return 'MCI';
+  if (p.includes('CN')) return 'CN';
+  return null;
+}
+
+function handleFileChange(input, labelId) {
+  if (input.files.length > 0)
+    document.getElementById(labelId).innerHTML = '<strong>' + input.files[0].name + '</strong> ready for analysis';
+}
+
+function injectBrainHeatmap(elementId, html) {
+  const el = document.getElementById(elementId);
+  if (el && html) el.innerHTML = html;
+}
+
+function renderRing(prediction, confidence) {
+  const ctx = document.getElementById('ringCanvas').getContext('2d');
+  if (ringChart) ringChart.destroy();
+  const cls = getClass(prediction);
+  const cfg = CLASS_COLORS[cls] || { color: '#0d9488' };
+  const pct = Math.min(Math.max(confidence * 100, 0), 100);
+  document.getElementById('resVal').style.color = cfg.color;
+  document.getElementById('statusDot').style.background = cfg.color;
+  ['cn','mci','ad'].forEach(c => document.getElementById('pill-' + c).className = 'cpill');
+  if (cls) document.getElementById('pill-' + cls.toLowerCase()).className = 'cpill active-' + cls.toLowerCase();
+  ringChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { datasets: [
+      { data: [pct, 100-pct], backgroundColor: [cfg.color, '#f1f5f9'], borderWidth: 0, hoverOffset: 0 },
+      { data: [100], backgroundColor: ['#f8fafc'], borderWidth: 1, borderColor: '#e2e8f0', hoverOffset: 0 }
+    ]},
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      cutout: '74%',
+      rotation: -90,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      animation: { animateRotate: true, duration: 800 }
+    }
+  });
+}
+
+function renderDoughnut(canvasId, scores, instance) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if (instance) instance.destroy();
+  return new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Pearson', 'Granger', 'Wavelet'],
+      datasets: [{ data: scores, backgroundColor: ['#eab308','#ec4899','#3b82f6'], borderWidth: 0, hoverOffset: 3 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom',
+        labels: { color: '#64748b', font: { family: 'Inter', size: 12 }, boxWidth: 10, padding: 12 } } },
+      cutout: '65%'
+    }
+  });
+}
+
+async function runDiagnostic() {
+  const file = document.getElementById('diagInput').files[0];
+  if (!file) return alert("Please select a .npy file.");
+  document.getElementById('diagLoader').style.display = 'flex';
+  document.getElementById('diagResults').style.display = 'none';
+  const fd = new FormData(); fd.append('file', file);
+  try {
+    const res  = await fetch('/predict_diag', { method: 'POST', body: fd });
+    const data = await res.json();
+    document.getElementById('diagLoader').style.display = 'none';
+    if (data.status === 'success') {
+      document.getElementById('diagResults').style.display = 'block';
+      currentPath = data.file_path;
+      document.getElementById('resVal').innerText = data.prediction;
+      renderRing(data.prediction, data.confidence);
+      diagChartInstance = renderDoughnut('diagChart', data.explainability.modality_scores, diagChartInstance);
+      document.getElementById('autoProgPanel').style.display =
+        data.prediction.includes("MCI") ? 'block' : 'none';
+      injectBrainHeatmap('diag-brain-heatmap', data.explainability.brain_heatmap_html);
+    }
+  } catch(e) { document.getElementById('diagLoader').style.display = 'none'; console.error(e); }
+}
+
+async function runDirectPrognosis() {
+  const file = document.getElementById('progInput').files[0];
+  if (!file) return alert("Please select a .npy file.");
+  document.getElementById('progLoader').style.display = 'flex';
+  document.getElementById('directProgResults').style.display = 'none';
+  const fd = new FormData(); fd.append('file', file);
+  try {
+    const up     = await fetch('/predict_diag', { method: 'POST', body: fd });
+    const upData = await up.json();
+    const pr     = await fetch('/predict_prog', { method: 'POST', body: new URLSearchParams({'file_path': upData.file_path}) });
+    const data   = await pr.json();
+    document.getElementById('progLoader').style.display = 'none';
+    if (data.status === 'success') {
+      document.getElementById('directProgResults').style.display = 'block';
+      const cls = getClass(data.label);
+      const cfg = CLASS_COLORS[cls] || {};
+      const pv  = document.getElementById('directProgVal');
+      pv.innerText = data.label.toUpperCase();
+      pv.style.color = cfg.color || '#0f172a';
+      const isProgressive = data.label.toUpperCase().includes('PMCI') || data.label.toUpperCase().includes('P-MCI');
+      document.getElementById('directProgDesc').innerText = isProgressive
+        ? 'Progressive MCI — High risk of progression to Alzheimer\'s disease. Clinical follow-up recommended.'
+        : 'Stable MCI — Condition appears stable. Continued monitoring advised.';
+      progChartInstance = renderDoughnut('progChart', upData.explainability.modality_scores, progChartInstance);
+      injectBrainHeatmap('prog-brain-heatmap', data.explainability.brain_heatmap_html);
+    }
+  } catch(e) { document.getElementById('progLoader').style.display = 'none'; console.error(e); }
+}
+
+async function checkProgression() {
+  const resDiv = document.getElementById('autoProgResult');
+  resDiv.className = 'prog-inline-res';
+  resDiv.style.display = 'block';
+  resDiv.innerHTML = '<span style="color:#64748b;font-size:0.85rem;">Analyzing…</span>';
+  const res  = await fetch('/predict_prog', { method: 'POST', body: new URLSearchParams({'file_path': currentPath}) });
+  const data = await res.json();
+  if (data.status === 'success') {
+    const label = data.label.toUpperCase();
+    const isProgressive = label.includes('PMCI') || label.includes('P-MCI');
+    const color    = isProgressive ? '#dc2626' : '#16a34a';
+    const bg       = isProgressive ? '#fef2f2' : '#f0fdf4';
+    const border   = isProgressive ? '#fecaca' : '#bbf7d0';
+    const icon     = isProgressive ? '⬆' : '✓';
+    const headline = isProgressive ? 'Progressive MCI' : 'Stable MCI';
+    const desc     = isProgressive
+      ? 'High risk of progression to Alzheimer\'s disease. Clinical follow-up recommended.'
+      : 'Condition appears stable. Continued monitoring advised.';
+    resDiv.className = 'prog-inline-res visible';
+    resDiv.innerHTML = `
+      <div style="display:flex;align-items:center;gap:14px;background:${bg};
+                  border:2px solid ${border};border-radius:12px;padding:16px 20px;margin-top:4px;">
+        <div style="width:48px;height:48px;border-radius:12px;background:${color};
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:1.4rem;color:#fff;flex-shrink:0;">${icon}</div>
+        <div>
+          <div style="font-size:1.1rem;font-weight:800;color:${color};line-height:1.2;">${headline}</div>
+          <div style="font-size:0.82rem;color:#374151;margin-top:4px;line-height:1.5;">${desc}</div>
+        </div>
+      </div>`;
+  }
+}
+</script>
+</body>
+</html>
